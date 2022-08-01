@@ -1,0 +1,24 @@
+# permissions for end users to edit redfishendpoints.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: redfishendpoint-editor-role
+rules:
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - redfishendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - redfishendpoints/status
+  verbs:
+  - get

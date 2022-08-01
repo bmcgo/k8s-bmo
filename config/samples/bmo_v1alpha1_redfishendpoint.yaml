@@ -1,0 +1,6 @@
+apiVersion: bmo.bmcgo.dev/v1alpha1
+kind: RedfishEndpoint
+metadata:
+  name: redfishendpoint-sample
+spec:
+  # TODO(user): Add fields here
