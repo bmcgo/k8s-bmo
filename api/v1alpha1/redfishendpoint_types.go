@@ -52,12 +52,12 @@ type RedfishSessionAuth struct {
 
 // RedfishEndpointStatus defines the observed state of RedfishEndpoint
 type RedfishEndpointStatus struct {
-	ErrorMessage      string      `json:"errorMessage,omitempty"`
-	LastUpdated       metav1.Time `json:"lastUpdated"`
-	SystemsDiscovered []System    `json:"systemsDiscovered,omitempty"`
+	ErrorMessage      string             `json:"errorMessage,omitempty"`
+	LastUpdated       metav1.Time        `json:"lastUpdated"`
+	DiscoveredSystems []DiscoveredSystem `json:"discoveredSystems,omitempty"`
 }
 
-type System struct {
+type DiscoveredSystem struct {
 	Name string `json:"name"`
 	UUID string `json:"uuid"`
 }

@@ -71,7 +71,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return r.requeue(err)
 	}
 
-	if len(endpoint.Status.SystemsDiscovered) == 0 {
+	if len(endpoint.Status.DiscoveredSystems) == 0 {
 		l.Info("Discovering systems")
 		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL}, l)
 		systemsDiscovered, err := rc.GetSystems()
@@ -79,7 +79,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			return r.requeue(err)
 		}
 		for _, s := range systemsDiscovered {
-			endpoint.Status.SystemsDiscovered = append(endpoint.Status.SystemsDiscovered, bmov1alpha1.System{
+			endpoint.Status.DiscoveredSystems = append(endpoint.Status.DiscoveredSystems, bmov1alpha1.DiscoveredSystem{
 				Name: s.Name,
 				UUID: s.UUID,
 			})

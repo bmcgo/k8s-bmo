@@ -31,3 +31,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - systems
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - systems/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - systems/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -64,12 +64,7 @@ spec:
           status:
             description: RedfishEndpointStatus defines the observed state of RedfishEndpoint
             properties:
-              errorMessage:
-                type: string
-              lastUpdated:
-                format: date-time
-                type: string
-              systemsDiscovered:
+              discoveredSystems:
                 items:
                   properties:
                     name:
@@ -81,6 +76,11 @@ spec:
                   - uuid
                   type: object
                 type: array
+              errorMessage:
+                type: string
+              lastUpdated:
+                format: date-time
+                type: string
             required:
             - lastUpdated
             type: object
