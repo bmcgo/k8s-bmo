@@ -1,6 +1,7 @@
 apiVersion: bmo.bmcgo.dev/v1alpha1
 kind: RedfishEndpoint
 metadata:
-  name: redfishendpoint-sample
+  name: sample-endpoint
 spec:
-  # TODO(user): Add fields here
+  authenticationMode: AuthNone
+  endpointURL: http://10.7.0.1:8000/

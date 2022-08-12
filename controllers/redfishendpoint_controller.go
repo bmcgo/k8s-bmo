@@ -21,6 +21,8 @@ import (
 	"github.com/bmcgo/k8s-bmo/redfish"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -81,6 +83,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				UUID: s.UUID,
 			})
 		}
+		endpoint.Status.LastUpdated = metav1.Now()
 		err = r.Status().Update(ctx, &endpoint)
 		if err != nil {
 			return r.requeue(err)
@@ -99,7 +102,7 @@ func (r *RedfishEndpointReconciler) handleDelete(
 	endpoint bmov1alpha1.RedfishEndpoint,
 	l logr.Logger) (ctrl.Result, error) {
 	//TODO:
-	return ctrl.Result{Requeue: false}, nil
+	return ctrl.Result{Requeue: false, RequeueAfter: time.Second * 10}, nil
 }
 
 func (r *RedfishEndpointReconciler) ensureFinalizer(ctx context.Context, endpoint bmov1alpha1.RedfishEndpoint) error {

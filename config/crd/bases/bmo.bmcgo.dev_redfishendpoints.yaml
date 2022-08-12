@@ -53,12 +53,13 @@ spec:
                 - password
                 - username
                 type: object
+              endpointURL:
+                type: string
               redfishSessionAuth:
                 type: object
             required:
             - authenticationMode
-            - basicAuth
-            - redfishSessionAuth
+            - endpointURL
             type: object
           status:
             description: RedfishEndpointStatus defines the observed state of RedfishEndpoint
@@ -68,8 +69,19 @@ spec:
               lastUpdated:
                 format: date-time
                 type: string
+              systemsDiscovered:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    uuid:
+                      type: string
+                  required:
+                  - name
+                  - uuid
+                  type: object
+                type: array
             required:
-            - errorMessage
             - lastUpdated
             type: object
         type: object
