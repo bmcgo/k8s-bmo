@@ -20,22 +20,34 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+// DesiredState
+// +kubebuilder:validation:Enum=NotManaged;Inspected;Provisioned;PowerOff
+type DesiredState string
+
+// ActualState
+// +kubebuilder:validation:Enum=Idle;Inspecting;Provisioning;PoweredOff
+type ActualState string
+
+const (
+	StateNotManaged  DesiredState = "NotManaged"
+	StateInspected   DesiredState = "Inspected"
+	StateProvisioned DesiredState = "Provisioned"
+	StatePowerOff    DesiredState = "PowerOff"
+
+	StateIdle         ActualState = "Idle"
+	StateInspecting   ActualState = "Inspecting"
+	StateProvisioning ActualState = "Provisioning"
+	StatePoweredOff   ActualState = "PoweredOff"
+)
 
 // SystemSpec defines the desired state of System
 type SystemSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of System. Edit system_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	State DesiredState `json:"foo,omitempty"`
 }
 
 // SystemStatus defines the observed state of System
 type SystemStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	State ActualState `json:"state"`
 }
 
 //+kubebuilder:object:root=true

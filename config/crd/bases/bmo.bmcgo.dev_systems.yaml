@@ -36,12 +36,27 @@ spec:
             description: SystemSpec defines the desired state of System
             properties:
               foo:
-                description: Foo is an example field of System. Edit system_types.go
-                  to remove/update
+                description: DesiredState
+                enum:
+                - NotManaged
+                - Inspected
+                - Provisioned
+                - PowerOff
                 type: string
             type: object
           status:
             description: SystemStatus defines the observed state of System
+            properties:
+              state:
+                description: ActualState
+                enum:
+                - Idle
+                - Inspecting
+                - Provisioning
+                - PoweredOff
+                type: string
+            required:
+            - state
             type: object
         type: object
     served: true
