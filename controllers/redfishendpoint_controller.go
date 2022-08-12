@@ -18,6 +18,9 @@ package controllers
 
 import (
 	"context"
+	"github.com/bmcgo/k8s-bmo/redfish"
+	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -47,11 +50,61 @@ type RedfishEndpointReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	l := log.FromContext(ctx)
+	endpoint := bmov1alpha1.RedfishEndpoint{}
+	err := r.Get(ctx, req.NamespacedName, &endpoint)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			l.Info("Deleted RedfishEndpoint", "NamespacedName", req.NamespacedName)
+			return ctrl.Result{Requeue: false}, nil
+		}
+		return r.requeue(err)
+	}
+	if !endpoint.DeletionTimestamp.IsZero() {
+		return r.handleDelete(ctx, endpoint, l)
+	}
 
-	// TODO(user): your logic here
+	err = r.ensureFinalizer(ctx, endpoint)
+	if err != nil {
+		return r.requeue(err)
+	}
+
+	if len(endpoint.Status.SystemsDiscovered) == 0 {
+		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL})
+		systemsDiscovered, err := rc.GetSystems()
+		if err != nil {
+			return r.requeue(err)
+		}
+		for _, s := range systemsDiscovered {
+			endpoint.Status.SystemsDiscovered = append(endpoint.Status.SystemsDiscovered, bmov1alpha1.System{
+				Name: s.Name,
+				UUID: s.UUID,
+			})
+		}
+		err = r.Status().Update(ctx, &endpoint)
+		if err != nil {
+			return r.requeue(err)
+		}
+	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *RedfishEndpointReconciler) requeue(err error) (ctrl.Result, error) {
+	return ctrl.Result{Requeue: true}, err
+}
+
+func (r *RedfishEndpointReconciler) handleDelete(
+	ctx context.Context,
+	endpoint bmov1alpha1.RedfishEndpoint,
+	l logr.Logger) (ctrl.Result, error) {
+	//TODO:
+	return ctrl.Result{Requeue: false}, nil
+}
+
+func (r *RedfishEndpointReconciler) ensureFinalizer(ctx context.Context, endpoint bmov1alpha1.RedfishEndpoint) error {
+	//TODO:
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

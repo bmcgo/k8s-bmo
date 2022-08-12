@@ -37,6 +37,8 @@ type RedfishEndpointSpec struct {
 	BasicAuth          BasicAuth          `json:"basicAuth"`
 	RedfishSessionAuth RedfishSessionAuth `json:"redfishSessionAuth"`
 	//OemAuth TODO
+
+	EndpointURL string `json:"endpointURL"`
 }
 
 type BasicAuth struct {
@@ -50,8 +52,14 @@ type RedfishSessionAuth struct {
 
 // RedfishEndpointStatus defines the observed state of RedfishEndpoint
 type RedfishEndpointStatus struct {
-	ErrorMessage string      `json:"errorMessage"`
-	LastUpdated  metav1.Time `json:"lastUpdated"`
+	ErrorMessage      string      `json:"errorMessage"`
+	LastUpdated       metav1.Time `json:"lastUpdated"`
+	SystemsDiscovered []System    `json:"systemsDiscovered"`
+}
+
+type System struct {
+	Name string
+	UUID string
 }
 
 //+kubebuilder:object:root=true
