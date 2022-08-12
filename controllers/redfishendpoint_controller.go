@@ -57,7 +57,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	err := r.Get(ctx, req.NamespacedName, &endpoint)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			l.Info("Deleted RedfishEndpoint", "NamespacedName", req.NamespacedName)
+			l.Info("Deleted RedfishEndpoint")
 			return ctrl.Result{Requeue: false}, nil
 		}
 		return r.requeue(err)
@@ -72,7 +72,8 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if len(endpoint.Status.SystemsDiscovered) == 0 {
-		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL})
+		l.Info("Discovering systems")
+		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL}, l)
 		systemsDiscovered, err := rc.GetSystems()
 		if err != nil {
 			return r.requeue(err)
@@ -84,10 +85,13 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			})
 		}
 		endpoint.Status.LastUpdated = metav1.Now()
+		l.Info("Discovery completed", "systems discovered", len(systemsDiscovered))
 		err = r.Status().Update(ctx, &endpoint)
 		if err != nil {
 			return r.requeue(err)
 		}
+		l.Info("Status saved")
+		return ctrl.Result{}, nil
 	}
 
 	return ctrl.Result{}, nil

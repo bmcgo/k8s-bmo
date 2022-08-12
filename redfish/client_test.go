@@ -1,6 +1,8 @@
 package redfish
 
 import (
+	"context"
+	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/require"
 	"log"
 	"testing"
@@ -9,7 +11,8 @@ import (
 func TestNewClient(t *testing.T) {
 	var err error
 	var systems []System
-	c := NewClient(ClientConfig{URL: "http://localhost:8000"})
+	l, _ := logr.FromContext(context.Background())
+	c := NewClient(ClientConfig{URL: "http://localhost:8000"}, l)
 	systems, err = c.GetSystems()
 	require.NoError(t, err)
 	for _, s := range systems {
