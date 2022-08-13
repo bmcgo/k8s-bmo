@@ -71,7 +71,11 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return r.requeue(err)
 	}
 
-	if len(endpoint.Status.DiscoveredSystems) == 0 {
+	if len(endpoint.Status.DiscoveredSystems) != 0 {
+		l.Info("Endpoint already discovered")
+		//TODO: update systems
+		return ctrl.Result{}, nil
+	} else {
 		l.Info("Discovering systems")
 		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL}, l)
 		systemsDiscovered, err := rc.GetSystems()
@@ -83,9 +87,32 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				Name: s.Name,
 				UUID: s.UUID,
 			})
+			system := &bmov1alpha1.System{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      s.Name + "-" + s.UUID,
+					Namespace: req.Namespace,
+					OwnerReferences: []metav1.OwnerReference{{
+						APIVersion: endpoint.APIVersion,
+						Kind:       endpoint.Kind,
+						Name:       endpoint.Name,
+						UID:        endpoint.UID,
+					}},
+					//Finalizers:                 nil,
+				},
+				Spec: bmov1alpha1.SystemSpec{State: bmov1alpha1.StateNotManaged},
+			}
+			l.Info("Creating System", "name", s.Name, "uuid", s.UUID)
+			err = r.Create(ctx, system)
+			if err != nil {
+				if errors.IsAlreadyExists(err) {
+					l.Info("System already exists", "name", s.Name, "uuid", s.UUID)
+				} else {
+					return r.requeue(err)
+				}
+			}
 		}
 		endpoint.Status.LastUpdated = metav1.Now()
-		l.Info("Discovery completed", "systems discovered", len(systemsDiscovered))
+		l.Info("Discovery completed", "Number of systems", len(systemsDiscovered))
 		err = r.Status().Update(ctx, &endpoint)
 		if err != nil {
 			return r.requeue(err)
@@ -93,8 +120,6 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		l.Info("Status saved")
 		return ctrl.Result{}, nil
 	}
-
-	return ctrl.Result{}, nil
 }
 
 func (r *RedfishEndpointReconciler) requeue(err error) (ctrl.Result, error) {

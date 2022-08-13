@@ -47,6 +47,7 @@ type SystemSpec struct {
 
 // SystemStatus defines the observed state of System
 type SystemStatus struct {
+	Id    string      `json:"id"`
 	State ActualState `json:"state"`
 }
 
