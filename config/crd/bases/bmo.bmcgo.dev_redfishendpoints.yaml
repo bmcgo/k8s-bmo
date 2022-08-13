@@ -12,10 +12,17 @@ spec:
     kind: RedfishEndpoint
     listKind: RedfishEndpointList
     plural: redfishendpoints
+    shortNames:
+    - rep
     singular: redfishendpoint
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: Endpoint URL
+      jsonPath: .spec.endpointURL
+      name: EndpointURL
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: RedfishEndpoint is the Schema for the redfishendpoints API

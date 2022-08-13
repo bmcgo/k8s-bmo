@@ -62,6 +62,8 @@ type DiscoveredSystem struct {
 	UUID string `json:"uuid"`
 }
 
+//+kubebuilder:resource:shortName=rep
+//+kubebuilder:printcolumn:name="EndpointURL",type="string",JSONPath=".spec.endpointURL",description="Endpoint URL",priority=0
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 

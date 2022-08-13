@@ -18,6 +18,8 @@ package controllers
 
 import (
 	"context"
+	"github.com/pkg/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -47,11 +49,33 @@ type SystemReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *SystemReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
-
-	// TODO(user): your logic here
+	l := log.FromContext(ctx)
+	system := bmov1alpha1.System{}
+	err := r.Get(ctx, req.NamespacedName, &system)
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			l.Info("Deleted System")
+			return ctrl.Result{Requeue: false}, nil
+		}
+		return r.requeue(err)
+	}
+	if system.Spec.State == bmov1alpha1.DesiredStateNotManaged {
+		if system.Status.State != bmov1alpha1.ActualStateNotManaged {
+			system.Status.State = bmov1alpha1.ActualStateNotManaged
+			err = r.Status().Update(ctx, &system)
+			if err != nil {
+				return r.requeue(errors.Wrap(err, "failed to update status"))
+			}
+		}
+		l.Info("System not managed")
+		return ctrl.Result{}, nil
+	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *SystemReconciler) requeue(err error) (ctrl.Result, error) {
+	return ctrl.Result{Requeue: true}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.

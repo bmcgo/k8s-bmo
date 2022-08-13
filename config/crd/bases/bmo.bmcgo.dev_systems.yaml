@@ -12,10 +12,21 @@ spec:
     kind: System
     listKind: SystemList
     plural: systems
+    shortNames:
+    - sys
     singular: system
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: Desired state
+      jsonPath: .spec.state
+      name: DesiredState
+      type: string
+    - description: Actual state
+      jsonPath: .status.state
+      name: ActualState
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: System is the Schema for the systems API
@@ -35,7 +46,7 @@ spec:
           spec:
             description: SystemSpec defines the desired state of System
             properties:
-              foo:
+              state:
                 description: DesiredState
                 enum:
                 - NotManaged
@@ -43,6 +54,8 @@ spec:
                 - Provisioned
                 - PowerOff
                 type: string
+            required:
+            - state
             type: object
           status:
             description: SystemStatus defines the observed state of System
@@ -52,9 +65,11 @@ spec:
               state:
                 description: ActualState
                 enum:
-                - Idle
+                - NotManaged
                 - Inspecting
+                - Inspected
                 - Provisioning
+                - Provisioned
                 - PoweredOff
                 type: string
             required:

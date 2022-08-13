@@ -62,6 +62,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 		return r.requeue(err)
 	}
+
 	if !endpoint.DeletionTimestamp.IsZero() {
 		return r.handleDelete(ctx, endpoint, l)
 	}
@@ -99,7 +100,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 					}},
 					//Finalizers:                 nil,
 				},
-				Spec: bmov1alpha1.SystemSpec{State: bmov1alpha1.StateNotManaged},
+				Spec: bmov1alpha1.SystemSpec{State: bmov1alpha1.DesiredStateNotManaged},
 			}
 			l.Info("Creating System", "name", s.Name, "uuid", s.UUID)
 			err = r.Create(ctx, system)

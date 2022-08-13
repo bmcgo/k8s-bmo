@@ -25,24 +25,26 @@ import (
 type DesiredState string
 
 // ActualState
-// +kubebuilder:validation:Enum=Idle;Inspecting;Provisioning;PoweredOff
+// +kubebuilder:validation:Enum=NotManaged;Inspecting;Inspected;Provisioning;Provisioned;PoweredOff
 type ActualState string
 
 const (
-	StateNotManaged  DesiredState = "NotManaged"
-	StateInspected   DesiredState = "Inspected"
-	StateProvisioned DesiredState = "Provisioned"
-	StatePowerOff    DesiredState = "PowerOff"
+	DesiredStateNotManaged  DesiredState = "NotManaged"
+	DesiredStateInspected   DesiredState = "Inspected"
+	DesiredStateProvisioned DesiredState = "Provisioned"
+	DesiredStatePowerOff    DesiredState = "PowerOff"
 
-	StateIdle         ActualState = "Idle"
-	StateInspecting   ActualState = "Inspecting"
-	StateProvisioning ActualState = "Provisioning"
-	StatePoweredOff   ActualState = "PoweredOff"
+	ActualStateNotManaged   ActualState = "NotManaged"
+	ActualStateInspecting   ActualState = "Inspecting"
+	ActualStateInspected    ActualState = "Inspected"
+	ActualStateProvisioning ActualState = "Provisioning"
+	ActualStateProvisioned  ActualState = "Provisioned"
+	ActualStatePoweredOff   ActualState = "PoweredOff"
 )
 
 // SystemSpec defines the desired state of System
 type SystemSpec struct {
-	State DesiredState `json:"foo,omitempty"`
+	State DesiredState `json:"state"`
 }
 
 // SystemStatus defines the observed state of System
@@ -51,8 +53,11 @@ type SystemStatus struct {
 	State ActualState `json:"state"`
 }
 
+//+kubebuilder:resource:shortName=sys
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="DesiredState",type="string",JSONPath=".spec.state",description="Desired state",priority=0
+//+kubebuilder:printcolumn:name="ActualState",type="string",JSONPath=".status.state",description="Actual state",priority=0
 
 // System is the Schema for the systems API
 type System struct {
