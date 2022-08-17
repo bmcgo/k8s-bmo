@@ -5,16 +5,16 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: systems.bmo.bmcgo.dev
+  name: baremetalnodes.bmo.bmcgo.dev
 spec:
   group: bmo.bmcgo.dev
   names:
-    kind: System
-    listKind: SystemList
-    plural: systems
+    kind: BareMetalNode
+    listKind: BareMetalNodeList
+    plural: baremetalnodes
     shortNames:
     - sys
-    singular: system
+    singular: baremetalnode
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
@@ -29,7 +29,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: System is the Schema for the systems API
+        description: BareMetalNode is the Schema for the systems API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -44,7 +44,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: SystemSpec defines the desired state of System
+            description: BareMetalNodeSpec defines the desired state of BareMetalNode
             properties:
               state:
                 description: DesiredState
@@ -58,7 +58,7 @@ spec:
             - state
             type: object
           status:
-            description: SystemStatus defines the observed state of System
+            description: BareMetalNodeStatus defines the observed state of BareMetalNode
             properties:
               id:
                 type: string

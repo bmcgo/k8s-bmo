@@ -78,7 +78,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, nil
 	} else {
 		l.Info("Discovering systems")
-		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL}, l)
+		rc := redfish.NewClient(redfish.ClientConfig{URL: endpoint.Spec.EndpointURL, Logger: &l, Context: &ctx})
 		systemsDiscovered, err := rc.GetSystems()
 		if err != nil {
 			return r.requeue(err)
@@ -88,7 +88,7 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 				Name: s.Name,
 				UUID: s.UUID,
 			})
-			system := &bmov1alpha1.System{
+			system := &bmov1alpha1.BareMetalNode{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      s.Name + "-" + s.UUID,
 					Namespace: req.Namespace,
@@ -100,13 +100,13 @@ func (r *RedfishEndpointReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 					}},
 					//Finalizers:                 nil,
 				},
-				Spec: bmov1alpha1.SystemSpec{State: bmov1alpha1.DesiredStateNotManaged},
+				Spec: bmov1alpha1.BareMetalNodeSpec{State: bmov1alpha1.DesiredStateNotManaged},
 			}
-			l.Info("Creating System", "name", s.Name, "uuid", s.UUID)
+			l.Info("Creating BareMetalNode", "name", s.Name, "uuid", s.UUID)
 			err = r.Create(ctx, system)
 			if err != nil {
 				if errors.IsAlreadyExists(err) {
-					l.Info("System already exists", "name", s.Name, "uuid", s.UUID)
+					l.Info("BareMetalNode already exists", "name", s.Name, "uuid", s.UUID)
 				} else {
 					return r.requeue(err)
 				}

@@ -2,10 +2,12 @@ package redfish
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/go-logr/logr"
 	"log"
 	"net/http"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
 type Client struct {
@@ -13,18 +15,32 @@ type Client struct {
 	urlSystems string
 	client     *http.Client
 	l          logr.Logger
+	ctx        context.Context
 }
 
 type ClientConfig struct {
-	URL string
+	URL     string
+	Logger  *logr.Logger
+	Context *context.Context
 }
 
-func NewClient(c ClientConfig, logger logr.Logger) *Client {
+func NewClient(c ClientConfig) *Client {
+	var ctx context.Context
+	var l logr.Logger
+	if c.Context == nil {
+		ctx = context.Background()
+	} else {
+		ctx = *c.Context
+	}
+	if c.Logger == nil {
+		l = zap.New()
+	}
 	return &Client{
 		endpoint:   c.URL,
 		urlSystems: c.URL + "/redfish/v1/Systems",
 		client:     &http.Client{},
-		l:          logger.WithName("client"),
+		l:          l,
+		ctx:        ctx,
 	}
 }
 

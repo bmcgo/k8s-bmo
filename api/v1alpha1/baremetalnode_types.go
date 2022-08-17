@@ -39,16 +39,16 @@ const (
 	ActualStateInspected    ActualState = "Inspected"
 	ActualStateProvisioning ActualState = "Provisioning"
 	ActualStateProvisioned  ActualState = "Provisioned"
-	ActualStatePoweredOff   ActualState = "PoweredOff"
+	ActualStatePoweredOff   ActualState = "PowerOff"
 )
 
-// SystemSpec defines the desired state of System
-type SystemSpec struct {
+// BareMetalNodeSpec defines the desired state of BareMetalNode
+type BareMetalNodeSpec struct {
 	State DesiredState `json:"state"`
 }
 
-// SystemStatus defines the observed state of System
-type SystemStatus struct {
+// BareMetalNodeStatus defines the observed state of BareMetalNode
+type BareMetalNodeStatus struct {
 	Id    string      `json:"id"`
 	State ActualState `json:"state"`
 }
@@ -59,24 +59,24 @@ type SystemStatus struct {
 //+kubebuilder:printcolumn:name="DesiredState",type="string",JSONPath=".spec.state",description="Desired state",priority=0
 //+kubebuilder:printcolumn:name="ActualState",type="string",JSONPath=".status.state",description="Actual state",priority=0
 
-// System is the Schema for the systems API
-type System struct {
+// BareMetalNode is the Schema for the systems API
+type BareMetalNode struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   SystemSpec   `json:"spec,omitempty"`
-	Status SystemStatus `json:"status,omitempty"`
+	Spec   BareMetalNodeSpec   `json:"spec,omitempty"`
+	Status BareMetalNodeStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// SystemList contains a list of System
+// SystemList contains a list of BareMetalNode
 type SystemList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []System `json:"items"`
+	Items           []BareMetalNode `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&System{}, &SystemList{})
+	SchemeBuilder.Register(&BareMetalNode{}, &SystemList{})
 }

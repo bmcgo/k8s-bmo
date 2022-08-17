@@ -36,7 +36,7 @@ type jsonVirtualMediaActionInsertPatch struct {
 	Inserted bool   `json:"Inserted"`
 }
 
-func (s *Manager) InsertMedia(mt MediaType, image string) (err error) {
+func (s *Manager) InsertVirtualMedia(mt MediaType, image string) (err error) {
 
 	jsonVMList := jsonVirtualMediaList{}
 	err = s.client.Get(s.client.endpoint+s.manager.VirtualMedia.Id, &jsonVMList)

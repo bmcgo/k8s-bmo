@@ -4,9 +4,9 @@ import "fmt"
 
 type MediaType string
 
-const mediaTypeCD MediaType = "CD"
+const MediaTypeCD MediaType = "CD"
 
-func (s *System) InsertMedia(mt MediaType, image string) error {
+func (s *System) InsertVirtualMedia(mt MediaType, image string) error {
 	if len(s.computerSystem.Links.ManagedBy) == 0 {
 		return fmt.Errorf("no managers in system")
 	}
@@ -14,5 +14,5 @@ func (s *System) InsertMedia(mt MediaType, image string) error {
 	if err != nil {
 		return err
 	}
-	return m.InsertMedia(mt, image)
+	return m.InsertVirtualMedia(mt, image)
 }

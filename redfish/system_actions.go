@@ -3,9 +3,9 @@ package redfish
 type ResetType string
 
 const (
-	resetTypeForceRestart ResetType = "ForceRestart"
-	resetTypeForceOn      ResetType = "ForceOn"
-	resetTypeForceOff     ResetType = "ForceOff"
+	ResetForceRestart ResetType = "ForceRestart"
+	ResetForceOn      ResetType = "ForceOn"
+	ResetForceOff     ResetType = "ForceOff"
 )
 
 type ResetBody struct {

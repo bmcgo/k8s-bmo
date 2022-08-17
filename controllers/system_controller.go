@@ -18,7 +18,7 @@ package controllers
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,7 +29,7 @@ import (
 	bmov1alpha1 "github.com/bmcgo/k8s-bmo/api/v1alpha1"
 )
 
-// SystemReconciler reconciles a System object
+// SystemReconciler reconciles a BareMetalNode object
 type SystemReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
@@ -42,7 +42,7 @@ type SystemReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the System object against the actual cluster state, and then
+// the BareMetalNode object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
@@ -50,37 +50,46 @@ type SystemReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *SystemReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
-	system := bmov1alpha1.System{}
+	system := bmov1alpha1.BareMetalNode{}
 	err := r.Get(ctx, req.NamespacedName, &system)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			l.Info("Deleted System")
+			l.Info("Deleted BareMetalNode")
 			return ctrl.Result{Requeue: false}, nil
 		}
-		return r.requeue(err)
+		return r.requeueIfError(err)
 	}
-	if system.Spec.State == bmov1alpha1.DesiredStateNotManaged {
-		if system.Status.State != bmov1alpha1.ActualStateNotManaged {
-			system.Status.State = bmov1alpha1.ActualStateNotManaged
-			err = r.Status().Update(ctx, &system)
-			if err != nil {
-				return r.requeue(errors.Wrap(err, "failed to update status"))
-			}
-		}
-		l.Info("System not managed")
+	if system.Spec.State == bmov1alpha1.DesiredState(system.Status.State) {
+		l.Info("BareMetalNode has consistent state. No action.", "state", system.Status.State)
 		return ctrl.Result{}, nil
 	}
 
+	switch system.Spec.State {
+	case bmov1alpha1.DesiredStateNotManaged:
+		system.Status.State = bmov1alpha1.ActualStateNotManaged
+		return r.requeueIfError(r.Status().Update(ctx, &system))
+	case bmov1alpha1.DesiredStatePowerOff:
+		return r.handlePowerOff(ctx, system)
+	default:
+		l.Error(errors.New("not implemented"), "not implemented")
+		return ctrl.Result{}, nil
+	}
+}
+
+func (r *SystemReconciler) handlePowerOff(ctx context.Context, system bmov1alpha1.BareMetalNode) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func (r *SystemReconciler) requeue(err error) (ctrl.Result, error) {
-	return ctrl.Result{Requeue: true}, err
+func (r *SystemReconciler) requeueIfError(err error) (ctrl.Result, error) {
+	if err != nil {
+		return ctrl.Result{Requeue: true}, err
+	}
+	return ctrl.Result{}, err
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *SystemReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&bmov1alpha1.System{}).
+		For(&bmov1alpha1.BareMetalNode{}).
 		Complete(r)
 }

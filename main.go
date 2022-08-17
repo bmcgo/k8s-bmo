@@ -86,7 +86,7 @@ func main() {
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "System")
+		setupLog.Error(err, "unable to create controller", "controller", "BareMetalNode")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
