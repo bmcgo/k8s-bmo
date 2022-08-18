@@ -8,6 +8,58 @@ rules:
 - apiGroups:
   - bmo.bmcgo.dev
   resources:
+  - baremetalnodes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - baremetalnodes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - baremetalnodes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - ipmiendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - ipmiendpoints/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - ipmiendpoints/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
   - redfishendpoints
   verbs:
   - create
@@ -27,32 +79,6 @@ rules:
   - bmo.bmcgo.dev
   resources:
   - redfishendpoints/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - bmo.bmcgo.dev
-  resources:
-  - systems
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - bmo.bmcgo.dev
-  resources:
-  - systems/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - bmo.bmcgo.dev
-  resources:
-  - systems/status
   verbs:
   - get
   - patch

@@ -5,31 +5,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
   creationTimestamp: null
-  name: baremetalnodes.bmo.bmcgo.dev
+  name: ipmiendpoints.bmo.bmcgo.dev
 spec:
   group: bmo.bmcgo.dev
   names:
-    kind: BareMetalNode
-    listKind: BareMetalNodeList
-    plural: baremetalnodes
+    kind: IPMIEndpoint
+    listKind: IPMIEndpointList
+    plural: ipmiendpoints
     shortNames:
-    - bmn
-    singular: baremetalnode
+    - ipmie
+    singular: ipmiendpoint
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: Desired state
-      jsonPath: .spec.state
-      name: DesiredState
-      type: string
-    - description: Actual state
-      jsonPath: .status.state
-      name: ActualState
+    - description: Baare Metal Node Name
+      jsonPath: .status.bareMetalNodeName
+      name: BareMetalNodeName
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: BareMetalNode is the Schema for the systems API
+        description: IPMIEndpoint is the Schema for the ipmiendpoints API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -44,37 +40,32 @@ spec:
           metadata:
             type: object
           spec:
-            description: BareMetalNodeSpec defines the desired state of BareMetalNode
+            description: IPMIEndpointSpec defines the desired state of IPMIEndpoint
             properties:
-              state:
-                description: DesiredState
-                enum:
-                - NotManaged
-                - Inspected
-                - Provisioned
-                - PowerOff
+              bootMacAddress:
+                type: string
+              host:
+                type: string
+              password:
+                type: string
+              port:
+                type: integer
+              username:
                 type: string
             required:
-            - state
+            - bootMacAddress
+            - host
+            - password
+            - port
+            - username
             type: object
           status:
-            description: BareMetalNodeStatus defines the observed state of BareMetalNode
+            description: IPMIEndpointStatus defines the observed state of IPMIEndpoint
             properties:
-              id:
+              bareMetalNodeName:
                 type: string
-              state:
-                description: ActualState
-                enum:
-                - NotManaged
-                - Inspecting
-                - Inspected
-                - Provisioning
-                - Provisioned
-                - PoweredOff
+              errorMessage:
                 type: string
-            required:
-            - id
-            - state
             type: object
         type: object
     served: true

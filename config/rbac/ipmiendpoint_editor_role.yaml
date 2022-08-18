@@ -1,0 +1,24 @@
+# permissions for end users to edit ipmiendpoints.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ipmiendpoint-editor-role
+rules:
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - ipmiendpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bmo.bmcgo.dev
+  resources:
+  - ipmiendpoints/status
+  verbs:
+  - get

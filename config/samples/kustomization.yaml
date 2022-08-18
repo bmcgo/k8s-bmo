@@ -2,4 +2,5 @@
 resources:
 - bmo_v1alpha1_redfishendpoint.yaml
 - bmo_v1alpha1_system.yaml
+- bmo_v1alpha1_ipmiendpoint.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

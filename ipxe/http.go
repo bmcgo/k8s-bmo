@@ -12,15 +12,15 @@ var ipxeScriptTemplate string
 
 type ipxeScriptParameters struct {
 	ServerAddr string
-	Kernel string
-	Initrd string
+	Kernel     string
+	Initrd     string
 }
 
 type HttpServer struct {
-	listenAddr string
-	ipxeScript []byte
+	listenAddr           string
+	ipxeScript           []byte
 	ipxeScriptParameters ipxeScriptParameters
-	ipxeScriptTemplate template.Template
+	ipxeScriptTemplate   template.Template
 }
 
 func NewHttpServer(listenAddr string, ipxeScriptParams ipxeScriptParameters) (*HttpServer, error) {

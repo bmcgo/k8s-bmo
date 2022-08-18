@@ -53,7 +53,7 @@ type BareMetalNodeStatus struct {
 	State ActualState `json:"state"`
 }
 
-//+kubebuilder:resource:shortName=sys
+//+kubebuilder:resource:shortName=bmn
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:printcolumn:name="DesiredState",type="string",JSONPath=".spec.state",description="Desired state",priority=0
@@ -70,13 +70,13 @@ type BareMetalNode struct {
 
 //+kubebuilder:object:root=true
 
-// SystemList contains a list of BareMetalNode
-type SystemList struct {
+// BareMetalNodeList contains a list of BareMetalNode
+type BareMetalNodeList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []BareMetalNode `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&BareMetalNode{}, &SystemList{})
+	SchemeBuilder.Register(&BareMetalNode{}, &BareMetalNodeList{})
 }

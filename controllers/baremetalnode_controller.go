@@ -35,9 +35,9 @@ type BareMetalNodeReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=bmo.bmcgo.dev,resources=systems,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=bmo.bmcgo.dev,resources=systems/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=bmo.bmcgo.dev,resources=systems/finalizers,verbs=update
+//+kubebuilder:rbac:groups=bmo.bmcgo.dev,resources=baremetalnodes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=bmo.bmcgo.dev,resources=baremetalnodes/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=bmo.bmcgo.dev,resources=baremetalnodes/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -50,8 +50,8 @@ type BareMetalNodeReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *BareMetalNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
-	system := bmov1alpha1.BareMetalNode{}
-	err := r.Get(ctx, req.NamespacedName, &system)
+	bmn := bmov1alpha1.BareMetalNode{}
+	err := r.Get(ctx, req.NamespacedName, &bmn)
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			l.Info("Deleted BareMetalNode")
@@ -59,17 +59,17 @@ func (r *BareMetalNodeReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 		return r.requeueIfError(err)
 	}
-	if system.Spec.State == bmov1alpha1.DesiredState(system.Status.State) {
-		l.Info("BareMetalNode has consistent state. No action.", "state", system.Status.State)
+	if bmn.Spec.State == bmov1alpha1.DesiredState(bmn.Status.State) {
+		l.Info("BareMetalNode has consistent state. No action.", "state", bmn.Status.State)
 		return ctrl.Result{}, nil
 	}
 
-	switch system.Spec.State {
+	switch bmn.Spec.State {
 	case bmov1alpha1.DesiredStateNotManaged:
-		system.Status.State = bmov1alpha1.ActualStateNotManaged
-		return r.requeueIfError(r.Status().Update(ctx, &system))
+		bmn.Status.State = bmov1alpha1.ActualStateNotManaged
+		return r.requeueIfError(r.Status().Update(ctx, &bmn))
 	case bmov1alpha1.DesiredStatePowerOff:
-		return r.handlePowerOff(ctx, system)
+		return r.handlePowerOff(ctx, bmn)
 	default:
 		l.Error(errors.New("not implemented"), "not implemented")
 		return ctrl.Result{}, nil

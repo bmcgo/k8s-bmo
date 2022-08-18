@@ -22,7 +22,16 @@ resources:
   controller: true
   domain: bmcgo.dev
   group: bmo
-  kind: System
+  kind: BareMetalNode
+  path: github.com/bmcgo/k8s-bmo/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: bmcgo.dev
+  group: bmo
+  kind: IPMIEndpoint
   path: github.com/bmcgo/k8s-bmo/api/v1alpha1
   version: v1alpha1
 version: "3"

@@ -37,7 +37,7 @@ Drive Fault          : false
 Cooling/Fan Fault    : false`
 
 func TestIpmiTool_GetChassisStatus(t *testing.T) {
-	it := New("1.2.3.4", "1234", "admin", "secret")
+	it := New("1.2.3.4", 1234, "admin", "secret")
 	it.execAndGetCombinedOutputFunc = func(args ...string) (string, error) {
 		return chassisStatusOutput, nil
 	}
@@ -93,4 +93,4 @@ Boot parameter data: 8008000000
    - Console Redirection control : System Default
    - BIOS verbosity : Console redirection occurs per BIOS configuration setting (default)
    - BIOS Mux Control Override : BIOS uses recommended setting of the mux at the end of POST
- */
+*/

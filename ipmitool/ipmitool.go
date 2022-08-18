@@ -2,6 +2,7 @@ package ipmitool
 
 import (
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
@@ -59,6 +60,7 @@ func (i IpmiTool) GetChassisStatus() (status ChassisStatus, err error) {
 func (i IpmiTool) execAndGetCombinedOutput(args ...string) (string, error) {
 	cmd := exec.Command(i.cmd, append(i.args, args...)...)
 	out, err := cmd.CombinedOutput()
+	//TODO: return own error with both original exec.Command error and combined output included
 	return string(out), err
 }
 
@@ -68,7 +70,8 @@ type IpmiTool struct {
 	execAndGetCombinedOutputFunc func(...string) (string, error)
 }
 
-func New(host string, port string, username string, password string) IpmiTool {
+func New(host string, portInt int, username string, password string) IpmiTool {
+	port := strconv.Itoa(portInt)
 	it := IpmiTool{
 		cmd:  "ipmitool",
 		args: []string{"-I", "lanplus", "-H", host, "-p", port, "-U", username, "-P", password},
