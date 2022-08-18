@@ -53,8 +53,10 @@ func init() {
 func main() {
 	var metricsAddr string
 	var probeAddr string
+	var ipxeHTTPAddr string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.StringVar(&ipxeHTTPAddr, "ipxe-http-addr", ":8082", "The address the ipxe http server binds to.")
 	opts := zap.Options{
 		Development: true,
 		TimeEncoder: zapcore.ISO8601TimeEncoder,
@@ -82,7 +84,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "RedfishEndpoint")
 		os.Exit(1)
 	}
-	if err = (&controllers.SystemReconciler{
+	if err = (&controllers.BareMetalNodeReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

@@ -29,8 +29,8 @@ import (
 	bmov1alpha1 "github.com/bmcgo/k8s-bmo/api/v1alpha1"
 )
 
-// SystemReconciler reconciles a BareMetalNode object
-type SystemReconciler struct {
+// BareMetalNodeReconciler reconciles a BareMetalNode object
+type BareMetalNodeReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
@@ -48,7 +48,7 @@ type SystemReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
-func (r *SystemReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *BareMetalNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	l := log.FromContext(ctx)
 	system := bmov1alpha1.BareMetalNode{}
 	err := r.Get(ctx, req.NamespacedName, &system)
@@ -76,11 +76,11 @@ func (r *SystemReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 }
 
-func (r *SystemReconciler) handlePowerOff(ctx context.Context, system bmov1alpha1.BareMetalNode) (ctrl.Result, error) {
+func (r *BareMetalNodeReconciler) handlePowerOff(ctx context.Context, system bmov1alpha1.BareMetalNode) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 
-func (r *SystemReconciler) requeueIfError(err error) (ctrl.Result, error) {
+func (r *BareMetalNodeReconciler) requeueIfError(err error) (ctrl.Result, error) {
 	if err != nil {
 		return ctrl.Result{Requeue: true}, err
 	}
@@ -88,7 +88,7 @@ func (r *SystemReconciler) requeueIfError(err error) (ctrl.Result, error) {
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *SystemReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *BareMetalNodeReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&bmov1alpha1.BareMetalNode{}).
 		Complete(r)

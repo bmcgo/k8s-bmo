@@ -1,0 +1,6 @@
+#!ipxe
+
+dhcp
+kernel http://{{.ServerAddr}}/kernel/{{.Kernel}}
+initrd http://{{.ServerAddr}}/{{.Initrd}}
+boot {{.Kernel}} initrd={{.Initrd}} lang=en_US
