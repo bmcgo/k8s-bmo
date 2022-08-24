@@ -1,6 +1,8 @@
 package ipmitool
 
 import (
+	"errors"
+	"log"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -55,6 +57,25 @@ func (i IpmiTool) GetChassisStatus() (status ChassisStatus, err error) {
 		}
 	}
 	return
+}
+
+func (i IpmiTool) GetBMCGUID() (string, error) {
+	output, err := i.execAndGetCombinedOutputFunc("bmc", "guid")
+	if err != nil {
+		return "", err
+	}
+	for _, line := range strings.Split(output, "\n") {
+		bits := strings.Split(line, ":")
+		if len(bits) == 2 {
+			value := strings.Trim(bits[1], " ")
+			if strings.Trim(bits[0], " ") == "System GUID"{
+				return value, nil
+			}
+		}
+	}
+	log.Println("ipmitool output:")
+	log.Println(output)
+	return "", errors.New("failed to find System GUID in ipmitool output")
 }
 
 func (i IpmiTool) execAndGetCombinedOutput(args ...string) (string, error) {
