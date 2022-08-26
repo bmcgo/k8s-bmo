@@ -60,7 +60,12 @@ spec:
           status:
             description: BareMetalNodeStatus defines the observed state of BareMetalNode
             properties:
+              bmcGUID:
+                type: string
               id:
+                type: string
+              lastUpdate:
+                format: date-time
                 type: string
               state:
                 description: ActualState
@@ -73,7 +78,6 @@ spec:
                 - PoweredOff
                 type: string
             required:
-            - id
             - state
             type: object
         type: object

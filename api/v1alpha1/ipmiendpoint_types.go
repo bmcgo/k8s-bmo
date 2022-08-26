@@ -27,12 +27,13 @@ type IPMIEndpointSpec struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 
-	BootMacAddress string `json:"bootMacAddress"`
+	BootMacAddress string `json:"bootMacAddress,omitempty"`
 }
 
 // IPMIEndpointStatus defines the observed state of IPMIEndpoint
 type IPMIEndpointStatus struct {
 	ErrorMessage string `json:"errorMessage,omitempty"`
+	BMCGUID      string `json:"bmcGUID,omitempty"`
 }
 
 //+kubebuilder:resource:shortName=ipmie

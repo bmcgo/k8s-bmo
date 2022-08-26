@@ -10,7 +10,7 @@ import (
 //go:embed ipxe_script_template.txt
 var ipxeScriptTemplate string
 
-type ipxeScriptParameters struct {
+type IPXEScriptParameters struct {
 	ServerAddr string
 	Kernel     string
 	Initrd     string
@@ -19,11 +19,11 @@ type ipxeScriptParameters struct {
 type HttpServer struct {
 	listenAddr           string
 	ipxeScript           []byte
-	ipxeScriptParameters ipxeScriptParameters
+	ipxeScriptParameters IPXEScriptParameters
 	ipxeScriptTemplate   template.Template
 }
 
-func NewHttpServer(listenAddr string, ipxeScriptParams ipxeScriptParameters) (*HttpServer, error) {
+func NewHttpServer(listenAddr string, ipxeScriptParams IPXEScriptParameters) (*HttpServer, error) {
 	tmpl, err := template.New("ipxe-script-template").Parse(ipxeScriptTemplate)
 	if err != nil {
 		return nil, err
@@ -45,9 +45,13 @@ func (s *HttpServer) handleIPXE(w http.ResponseWriter, r *http.Request) {
 	log.Println(r, "ok")
 }
 
-func (s *HttpServer) Start() error {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/ipxe", s.handleIPXE)
-	err := http.ListenAndServe(s.listenAddr, mux)
-	return err
+func (s *HttpServer) Start() {
+	go func() {
+		mux := http.NewServeMux()
+		mux.HandleFunc("/ipxe", s.handleIPXE)
+		err := http.ListenAndServe(s.listenAddr, mux)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 }

@@ -19,7 +19,10 @@ package controllers
 import (
 	"context"
 	"errors"
+	"github.com/bmcgo/k8s-bmo/ipmitool"
+	"github.com/go-logr/logr"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -64,19 +67,75 @@ func (r *BareMetalNodeReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, nil
 	}
 
+	l.Info("Action required", "desired state", bmn.Spec.State, "actual state", bmn.Status.State)
+
 	switch bmn.Spec.State {
 	case bmov1alpha1.DesiredStateNotManaged:
 		bmn.Status.State = bmov1alpha1.ActualStateNotManaged
 		return r.requeueIfError(r.Status().Update(ctx, &bmn))
 	case bmov1alpha1.DesiredStatePowerOff:
 		return r.handlePowerOff(ctx, bmn)
+	case bmov1alpha1.DesiredStateInspected:
+		return r.handleInspect(ctx, bmn, l)
 	default:
 		l.Error(errors.New("not implemented"), "not implemented")
 		return ctrl.Result{}, nil
 	}
 }
 
-func (r *BareMetalNodeReconciler) handlePowerOff(ctx context.Context, system bmov1alpha1.BareMetalNode) (ctrl.Result, error) {
+func (r *BareMetalNodeReconciler) handleInspect(
+	ctx context.Context,
+	bmn bmov1alpha1.BareMetalNode,
+	l logr.Logger) (ctrl.Result, error) {
+	ic, err := bmn.GetIPMIClient(ctx, r.Client)
+	if err != nil {
+		return r.requeueIfError(err)
+	}
+
+	if bmn.Status.State == bmov1alpha1.ActualStateInspecting {
+		bootDev, err := ic.GetBootDev()
+		if err != nil {
+			return r.requeueIfError(err)
+		}
+		if bootDev == ipmitool.BootDevPxe {
+			status, err := ic.GetChassisStatus()
+			if err != nil {
+				return r.requeueIfError(err)
+			}
+			if status.SystemPower == ipmitool.ChassisStatusPowerOn {
+				l.Info("Node is inspecting.")
+				return ctrl.Result{}, nil
+			} else {
+				l.Info("Node was powered off. Turning on.")
+				err = ic.Power(ipmitool.ChassisPowerOn)
+				return r.requeueIfError(err)
+			}
+		} else {
+			l.Info("Invalid node boot device", "boot device", bootDev)
+		}
+	}
+
+	err = ic.Power(ipmitool.ChassisPowerOff)
+	if err != nil {
+		return r.requeueIfError(err)
+	}
+	l.Info("Node powered off.")
+	err = ic.SetBootDev(ipmitool.BootDevPxe)
+	if err != nil {
+		return r.requeueIfError(err)
+	}
+	l.Info("Set node boot device to PXE.")
+	err = ic.Power(ipmitool.ChassisPowerOn)
+	if err != nil {
+		return r.requeueIfError(err)
+	}
+	l.Info("Node powered on.")
+	bmn.Status.State = bmov1alpha1.ActualStateInspecting
+	bmn.Status.LastUpdate = metav1.Now()
+	return r.requeueIfError(r.Status().Update(ctx, &bmn))
+}
+
+func (r *BareMetalNodeReconciler) handlePowerOff(ctx context.Context, bmn bmov1alpha1.BareMetalNode) (ctrl.Result, error) {
 	return ctrl.Result{}, nil
 }
 

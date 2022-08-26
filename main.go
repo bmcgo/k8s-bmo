@@ -18,6 +18,7 @@ package main
 
 import (
 	"flag"
+	"github.com/bmcgo/k8s-bmo/ipxe"
 	"os"
 
 	"go.uber.org/zap/zapcore"
@@ -63,8 +64,22 @@ func main() {
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
-
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	ipxeHTTPSever, err := ipxe.NewHttpServer(ipxeHTTPAddr, ipxe.IPXEScriptParameters{
+		ServerAddr: "10.7.0.1:8082",
+		Kernel:     "bzImage",
+		Initrd:     "initrg.gz",
+	})
+	if err != nil {
+		setupLog.Error(err, "failed to setup ipxe http server")
+		os.Exit(1)
+	}
+	ipxeHTTPSever.Start()
+	if err != nil {
+		setupLog.Error(err, "failed to start ipxe http server")
+		os.Exit(1)
+	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,

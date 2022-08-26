@@ -17,7 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
+	"github.com/bmcgo/k8s-bmo/ipmitool"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // DesiredState
@@ -49,8 +52,10 @@ type BareMetalNodeSpec struct {
 
 // BareMetalNodeStatus defines the observed state of BareMetalNode
 type BareMetalNodeStatus struct {
-	Id    string      `json:"id"`
-	State ActualState `json:"state"`
+	Id         string      `json:"id,omitempty"`
+	State      ActualState `json:"state"`
+	BMCGUID    string      `json:"bmcGUID,omitempty"`
+	LastUpdate metav1.Time `json:"lastUpdate,omitempty"`
 }
 
 //+kubebuilder:resource:shortName=bmn
@@ -79,4 +84,14 @@ type BareMetalNodeList struct {
 
 func init() {
 	SchemeBuilder.Register(&BareMetalNode{}, &BareMetalNodeList{})
+}
+
+func (b BareMetalNode) GetIPMIClient(ctx context.Context, c client.Client) (*ipmitool.IpmiTool, error) {
+	ep := IPMIEndpoint{}
+	err := c.Get(ctx, client.ObjectKey{Name: b.Name, Namespace: b.Namespace}, &ep)
+	if err != nil {
+		return nil, err
+	}
+	it := ipmitool.New(ep.Spec.Host, int(ep.Spec.Port), ep.Spec.Username, ep.Spec.Password)
+	return &it, nil
 }
