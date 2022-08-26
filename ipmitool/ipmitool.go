@@ -24,6 +24,11 @@ const ChassisPowerCycle = ChassisPower("cycle")
 const ChassisPowerSoft = ChassisPower("soft")
 const ChassisPowerOff = ChassisPower("off")
 
+type ChassisStatus struct {
+	SystemPower ChassisStatusSystemPower
+	DriveFault  ChassisStatusDriveFault
+}
+
 func (i IpmiTool) Power(power ChassisPower) error {
 	_, err := i.execAndGetCombinedOutputFunc("chassis", "power", string(power))
 	return err
@@ -34,9 +39,24 @@ func (i IpmiTool) SetBootDev(dev BootDev) error {
 	return err
 }
 
-type ChassisStatus struct {
-	SystemPower ChassisStatusSystemPower
-	DriveFault  ChassisStatusDriveFault
+func (i IpmiTool) GetBootDev() (BootDev, error) {
+	output, err := i.execAndGetCombinedOutputFunc("chassis", "bootparam", "get", "5")
+	if err != nil {
+		return "", err
+	}
+	for _, line := range strings.Split(output, "\n") {
+		bits := strings.Split(line, ":")
+		if len(bits) == 2 {
+			name := strings.Trim(bits[0], " -")
+			if name == "Boot Device Selector" {
+				if strings.Contains(bits[1], "PXE") {
+					return BootDevPxe, nil
+				}
+				return BootDev(strings.Trim(bits[1], " ")), nil
+			}
+		}
+	}
+	return "Unknown", nil
 }
 
 func (i IpmiTool) GetChassisStatus() (status ChassisStatus, err error) {
@@ -68,7 +88,7 @@ func (i IpmiTool) GetBMCGUID() (string, error) {
 		bits := strings.Split(line, ":")
 		if len(bits) == 2 {
 			value := strings.Trim(bits[1], " ")
-			if strings.Trim(bits[0], " ") == "System GUID"{
+			if strings.Trim(bits[0], " ") == "System GUID" {
 				return value, nil
 			}
 		}

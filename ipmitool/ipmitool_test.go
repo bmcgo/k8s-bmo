@@ -26,6 +26,18 @@ Discovered IPMB address 0x0
 System GUID  : 13a68dcb-e9cc-4d45-a155-01acdf360003
 Timestamp    : 06/12/1980 18:26:19`
 
+const bmcBootParam5Output = `Boot parameter version: 1
+Boot parameter 5 is valid/unlocked
+Boot parameter data: 8004000000
+ Boot Flags :
+   - Boot Flag Valid
+   - Options apply to only next boot
+   - BIOS PC Compatible (legacy) boot
+   - Boot Device Selector : Force PXE
+   - Console Redirection control : System Default
+   - BIOS verbosity : Console redirection occurs per BIOS configuration setting (default)
+   - BIOS Mux Control Override : BIOS uses recommended setting of the mux at the end of POST`
+
 func TestIpmiTool_GetChassisStatus(t *testing.T) {
 	it := New("1.2.3.4", 1234, "admin", "secret")
 	it.execAndGetCombinedOutputFunc = func(args ...string) (string, error) {
@@ -45,6 +57,16 @@ func TestIpmiTool_GetBMCGUID(t *testing.T) {
 	guid, err := it.GetBMCGUID()
 	require.NoError(t, err)
 	assert.Equal(t, "13a68dcb-e9cc-4d45-a155-01acdf360003", guid)
+}
+
+func TestIpmiTool_GetBootDev(t *testing.T) {
+	it := New("1.2.3.4", 1234, "admin", "secret")
+	it.execAndGetCombinedOutputFunc = func(args ...string) (string, error) {
+		return bmcBootParam5Output, nil
+	}
+	bootDev, err := it.GetBootDev()
+	require.NoError(t, err)
+	assert.Equal(t, BootDevPxe, bootDev)
 }
 
 /*
@@ -131,4 +153,17 @@ Discovered IPMB address 0x0
 RAW REQ (channel=0x0 netfn=0x6 lun=0x0 cmd=0x37 data_len=0)
 RAW RSP (16 bytes)
  cb 8d a6 13 cc e9 45 4d a1 55 01 ac df 36 00 03
+
+# ipmitool -I lanplus -H 10.7.0.1 -p 3133 -U admin -P password chassis bootparam get 5
+Boot parameter version: 1
+Boot parameter 5 is valid/unlocked
+Boot parameter data: 8004000000
+ Boot Flags :
+   - Boot Flag Valid
+   - Options apply to only next boot
+   - BIOS PC Compatible (legacy) boot
+   - Boot Device Selector : Force PXE
+   - Console Redirection control : System Default
+   - BIOS verbosity : Console redirection occurs per BIOS configuration setting (default)
+   - BIOS Mux Control Override : BIOS uses recommended setting of the mux at the end of POST
 */
