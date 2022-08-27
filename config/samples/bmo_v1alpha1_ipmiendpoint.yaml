@@ -3,4 +3,7 @@ kind: IPMIEndpoint
 metadata:
   name: ipmiendpoint-sample
 spec:
-  # TODO(user): Add fields here
+  host: 10.7.0.1
+  port: 3131
+  username: admin
+  password: secret
