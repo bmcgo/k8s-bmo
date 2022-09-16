@@ -2,8 +2,11 @@ package ipxe
 
 import (
 	_ "embed"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"text/template"
 )
 
@@ -45,10 +48,45 @@ func (s *HttpServer) handleIPXE(w http.ResponseWriter, r *http.Request) {
 	log.Println(r, "ok")
 }
 
+func (s *HttpServer) handleKernel(w http.ResponseWriter, r *http.Request) {
+	fd, err := os.Open("/store/iso/boot/bzImage")
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	_, err = io.Copy(w, fd)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+func (s *HttpServer) handleInitrd(w http.ResponseWriter, r *http.Request) {
+	sendFile(w, "/store/iso/boot/initrd")
+}
+
+func sendFile(w http.ResponseWriter, filename string) error {
+	fi, err := os.Stat(filename)
+	if err != nil {
+		log.Println(err)
+	}
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", fi.Size()))
+	w.WriteHeader(http.StatusOK)
+	fd, err := os.Open(filename)
+	bs, err := io.Copy(w, fd)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("%d bytes sent", bs)
+	return err
+}
+
 func (s *HttpServer) Start() {
 	go func() {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/ipxe", s.handleIPXE)
+		mux.HandleFunc("/kernel", s.handleKernel)
+		mux.HandleFunc("/initrd", s.handleInitrd)
 		err := http.ListenAndServe(s.listenAddr, mux)
 		if err != nil {
 			log.Println(err)

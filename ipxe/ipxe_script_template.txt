@@ -3,4 +3,4 @@
 dhcp
 kernel http://{{.ServerAddr}}/{{.Kernel}}
 initrd http://{{.ServerAddr}}/{{.Initrd}}
-boot {{.Kernel}} initrd={{.Initrd}} lang=en_US
+boot {{.Kernel}} initrd={{.Initrd}} console=ttyS0 lang=en_US

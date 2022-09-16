@@ -67,9 +67,9 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	ipxeHTTPSever, err := ipxe.NewHttpServer(ipxeHTTPAddr, ipxe.IPXEScriptParameters{
-		ServerAddr: "10.7.0.1:8082",
-		Kernel:     "bzImage",
-		Initrd:     "initrg.gz",
+		ServerAddr: "10.7.2.1:8280",
+		Kernel:     "kernel",
+		Initrd:     "initrd",
 	})
 	if err != nil {
 		setupLog.Error(err, "failed to setup ipxe http server")
